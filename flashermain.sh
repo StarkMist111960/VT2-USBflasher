@@ -1,79 +1,46 @@
 #!/bin/bash
-# Simple USB Image Flasher for ChromeOS VT2
-# Author: StarkMist111960
+# VT2-USB Flasher by StarkMist111960
 
-set -e
+echo "=== VT2 USB Image Flasher ==="
+echo "Listing removable drives..."
 
-DOWNLOADS_DIR="/home/chronos/user/Downloads"
+# List removable drives (skipping internal disks)
+lsblk -o NAME,SIZE,TYPE,MOUNTPOINT,RM | grep 'disk' | awk '$5 == 1 {print NR ") /dev/"$1 " - " $2}' || {
+    echo "No removable drives found."
+    exit 1
+}
 
-echo "=== ChromeOS USB Image Flasher ==="
 echo
+read -p "Enter the number of the USB drive you want to flash: " choice
 
-# Check for root
-if [[ $EUID -ne 0 ]]; then
-  echo "Please run as root (use 'sudo su' first)."
-  exit 1
-fi
+# Get the actual device name based on the number selected
+device=$(lsblk -o NAME,RM | grep ' 1' | awk 'NR=='"$choice"'{print $1}')
 
-# Find USB drives
-echo "Available drives:"
-lsblk -o NAME,SIZE,MODEL,MOUNTPOINT | grep -E "sd|mmc"
-echo
-read -p "Enter the device path (e.g., /dev/sda): " DEVICE
-
-# Confirm device exists
-if [ ! -b "$DEVICE" ]; then
-  echo "Error: Device not found."
-  exit 1
-fi
-
-# Find image files
-echo
-echo "Searching for image files in $DOWNLOADS_DIR..."
-mapfile -t images < <(find "$DOWNLOADS_DIR" -maxdepth 1 -type f \( -name "*.img" -o -name "*.iso" \))
-
-if [ ${#images[@]} -eq 0 ]; then
-  echo "No .img or .iso files found in $DOWNLOADS_DIR"
-  exit 1
+if [ -z "$device" ]; then
+    echo "Invalid selection. Exiting."
+    exit 1
 fi
 
 echo
-echo "Available image files:"
-for i in "${!images[@]}"; do
-  echo "$((i+1))) ${images[$i]}"
-done
+read -p "Enter the full path to the image file (e.g. /root/myimage.img): " image
 
-read -p "Select an image number: " IMG_CHOICE
-
-IMAGE="${images[$((IMG_CHOICE-1))]}"
-
-if [ ! -f "$IMAGE" ]; then
-  echo "Invalid selection."
-  exit 1
+if [ ! -f "$image" ]; then
+    echo "Image file not found!"
+    exit 1
 fi
 
 echo
-echo "You are about to flash:"
-echo "  Image:  $IMAGE"
-echo "  Target: $DEVICE"
-read -p "Are you sure? (y/N): " CONFIRM
+echo "You are about to flash '$image' to /dev/$device"
+read -p "Are you absolutely sure? (yes/no): " confirm
 
-if [[ "$CONFIRM" != "y" && "$CONFIRM" != "Y" ]]; then
-  echo "Aborted."
-  exit 0
+if [ "$confirm" != "yes" ]; then
+    echo "Operation cancelled."
+    exit 0
 fi
 
 echo
-echo "Flashing... this may take several minutes."
-echo "Progress will be shown below."
+echo "Flashing... this may take a while."
+sudo dd if="$image" of="/dev/$device" bs=4M status=progress conv=fsync
 
-# Unmount partitions if any
-umount ${DEVICE}?* 2>/dev/null || true
-
-# Write image
-dd if="$IMAGE" of="$DEVICE" bs=4M status=progress conv=fsync
-
-sync
 echo
-echo "✅ Flash complete!"
-echo "You may now safely remove your USB drive."
+echo "✅ Done! Image successfully written to /dev/$device"
