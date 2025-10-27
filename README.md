@@ -12,10 +12,10 @@ curl -L -O /root/flashermain.sh https://raw.githubusercontent.com/StarkMist11196
 make it executable:
 
 
-chmod +x /root/flashusb.sh
+chmod +x /root/flasher.sh
 
 
 run:
 
 
-/root/flashusb.sh
+/root/flasher.sh
