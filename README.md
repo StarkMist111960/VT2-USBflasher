@@ -6,7 +6,7 @@ Log in as root or (chronos and then do sudo su)
 run: 
 
 
-curl -L -o /root/flashermain.sh https://raw.githubusercontent.com/StarkMist111960/VT2-USBflasher/refs/heads/main/flashermain.sh | bash
+curl -L -O /root/flashermain.sh https://raw.githubusercontent.com/StarkMist111960/VT2-USBflasher/refs/heads/main/flashermain.sh | bash
 
 
 make it executable:
