@@ -1,5 +1,8 @@
 #!/bin/bash
+# menu_plugin
 # VT2-USB Flasher by StarkMist111960
+PLUGIN_AUTHOR="StarkMist111960"
+PLUGIN_VERSION="1.0"
 
 echo "=== VT2 USB Image Flasher ==="
 echo "Listing removable drives..."
