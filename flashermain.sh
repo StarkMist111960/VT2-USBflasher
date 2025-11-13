@@ -3,7 +3,9 @@
 # VT2-USB Flasher by StarkMist111960
 PLUGIN_AUTHOR="StarkMist111960"
 PLUGIN_VERSION="1.0"
+PLUGIN_NAME="VT2 USB Flasher"
 
+echo " "
 echo "=== VT2 USB Image Flasher ==="
 echo "Listing removable drives..."
 
